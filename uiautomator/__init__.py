@@ -402,7 +402,7 @@ class AutomatorServer(object):
     def install(self):
         base_dir = os.path.dirname(__file__)
         for apk in self.__apk_files:
-            self.adb.cmd("install", "-rt", os.path.join(base_dir, apk)).wait()
+            self.adb.cmd("install", "-r -t", os.path.join(base_dir, apk)).wait()
 
     @property
     def jsonrpc(self):
@@ -986,6 +986,20 @@ class AutomatorDeviceUiObject(object):
             ctp = lambda pt: point(*pt) if type(pt) == tuple else pt  # convert tuple to point
             s1, s2, e1, e2 = ctp(start1), ctp(start2), ctp(end1), ctp(end2)
             return self.jsonrpc.gesture(self.selector, s1, s2, e1, e2, steps)
+        obj = type("Gesture", (object,), {"to": to})()
+        return obj if len(args) == 0 else to(None, *args, **kwargs)
+
+    def gestureM(self, start1, start2, start3, *args, **kwargs):
+        '''
+        perform 3 point gesture.
+        Usage:
+        d().gestureM((100,200),(100,300),(100,400),(100,400),(100,400),(100,400))
+        d().gestureM((100,200),(100,300),(100,400)).to((100,400),(100,400),(100,400))
+        '''
+        def to(obj_self, end1, end2, end3, steps=100):
+            ctp = lambda pt: point(*pt) if type(pt) == tuple else pt  # convert tuple to point
+            s1, s2, s3, e1, e2, e3 = ctp(start1), ctp(start2), ctp(start3), ctp(end1), ctp(end2), ctp(end3)
+            return self.jsonrpc.gesture(self.selector, s1, s2, s3, e1, e2, e3, steps)
         obj = type("Gesture", (object,), {"to": to})()
         return obj if len(args) == 0 else to(None, *args, **kwargs)
 
